@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shooting Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <style>
+        /* Add this CSS to hide the score and miss count initially */
+        #score,
+        #miss {
+            display: none;
+        }
+
+        .target {
+            width: 150px;
+            height: 200px;
+            background-image: url("../img/gif.gif");
+            background-size: cover;
+            position: absolute;
+            cursor: pointer;
+            transition: transform 2s ease-in-out;
+            z-index: 100;
+        }
+
+        @keyframes birdMoveX {
+    0% { transform: translateX(-50%); } /* Adjusted initial position */
+    100% { transform: translateX(50%); } /* Adjusted final position */
+}
+
+    </style>
+    
+    <div id="game-container" class="relative h-screen overflow-hidden w-full bg-cover bg-center" style="background-image: url('../img/Asset 7.svg');">
+        <img class="absolute -right-16 -bottom-32 z-10 left-0 " src="../img/Asset 10.png" alt="">
+        <img class="absolute top-16 left-5 h-32 animate-move-cloud1 " src="../img/Asset 1.svg" alt="">
+        <img class="absolute top-28 right-96 h-44 z-30  animate-move-cloud2 " src="../img/Asset 2.svg" alt="">
+        <img class="absolute top-0 right-96 h-32    animate-move-cloud1 " src="../img/Asset 3.svg" alt="">
+        <img class="absolute top-0  left-96 h-32     animate-move-cloud2 "  src="../img/Asset 4.svg" alt="">
+        <img class="absolute top-36  right-1/2 h-32 z-0  animate-move-cloud2 " src="../img/Asset 5.svg" alt="">
+        <img class="absolute top-16  right-36  h-32      animate-move-cloud2 " src="../img/Asset 6.svg" alt="">
+        <div id="score" class="absolute font-bold text-3xl left-5 top-5 text-red-500">Score: 0</div>
+        <div id="miss" class="absolute font-bold text-3xl right-5 top-5 text-red-500">Miss: 0</div>
+        <button id="start-button" class="bg-green-600 z-50 text-white absolute bottom-24 rounded-3xl px-5 py-3 shadow-2xl shadow-green-600 font-bold hover:bg-red-600 hover:shadow-2xl hover:shadow-red-600  right-1/2">Start Game</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const gameContainer = document.getElementById('game-container');
+            const scoreDisplay = document.getElementById('score');
+            const missDisplay = document.getElementById('miss');
+            let score = 0;
+            let missCount = 0;
+            let gameStartTime = null; // Variable to store game start time
+            const GAME_DURATION = 120000; // 2 minutes in milliseconds
+            const MAX_MISS_COUNT = 3; // Updated to 3 misses
+
+            function createTarget() {
+    const target = document.createElement('div');
+    target.classList.add('target');
+    const randomLeft = Math.random() * (gameContainer.clientWidth - 50);
+    const randomTop = Math.random() * (gameContainer.clientHeight - 200); // Adjusted for the height of the target
+    target.style.left = `${randomLeft}px`;
+    target.style.top = `${randomTop}px`; // Set both X and Y positions randomly
+
+    // Randomize animation duration for a more natural feel
+    const animationDurationY = Math.random() * 2 + 1.5;
+    target.style.animation = `birdMoveY ${animationDurationY}s ease-in-out infinite`; // Apply the falling animation
+
+    let clicked = false; // Track whether the target has been clicked or not
+
+    target.addEventListener('animationiteration', () => {
+        if (!clicked) {
+            target.style.left = `${Math.random() * (gameContainer.clientWidth - 50)}px`; // Randomize horizontal position on each iteration
+        }
+    });
+
+    target.addEventListener('click', () => {
+        if (!clicked) {
+            score++;
+            updateScore();
+            gameContainer.removeChild(target);
+            clicked = true; // Mark the target as clicked
+            createTarget(); // Create a new target after the current one is clicked
+        } else {
+            missCount++; // Increment the miss count
+            updateMiss(); // Update the miss count display
+        }
+    });
+
+    gameContainer.appendChild(target);
+}
+
+
+            function updateScore() {
+                scoreDisplay.innerText = `Score: ${score}`;
+            }
+
+            function updateMiss() {
+                missDisplay.innerText = `Miss: ${missCount}`;
+            }
+
+            function checkGameEnd() {
+                if (Date.now() >= gameStartTime + GAME_DURATION) {
+                    clearInterval(gameTimer);
+                    alert("Time's up! Game Over!");
+                }
+            }
+
+            // Add an event listener to the start button
+            document.getElementById('start-button').addEventListener('click', () => {
+                startGame();
+            });
+
+            // Function to start the game
+function startGame() {
+    // Show score and miss count
+    scoreDisplay.style.display = 'block';
+    missDisplay.style.display = 'block';
+
+    // Hide the start game button
+    document.getElementById('start-button').style.display = 'none';
+
+    // Reset score and miss count
+    score = 0;
+    missCount = 0;
+    updateScore();
+    updateMiss();
+
+    // Start the game timer
+    gameStartTime = Date.now();
+    gameTimer = setInterval(() => {
+        checkGameEnd();
+    }, 1000);
+
+    // Create initial target
+    createTarget();
+}
+
+        });
+    </script>
+</body>
+</html>
